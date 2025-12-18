@@ -1,383 +1,330 @@
 import { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import Icon from '@/components/ui/icon';
 
-export default function Index() {
-  const [activeSection, setActiveSection] = useState('hero');
+interface Track {
+  id: string;
+  title: string;
+  genre: string;
+  duration: string;
+  coverEmoji: string;
+  createdAt: string;
+}
 
-  const scrollToSection = (sectionId: string) => {
-    setActiveSection(sectionId);
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+interface Artist {
+  name: string;
+  emoji: string;
+}
+
+export default function Index() {
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [tracks, setTracks] = useState<Track[]>([
+    { id: '1', title: 'Summer Nights', genre: 'Electronic', duration: '3:45', coverEmoji: '🌙', createdAt: '2 часа назад' },
+    { id: '2', title: 'City Dreams', genre: 'Hip-Hop', duration: '4:12', coverEmoji: '🏙️', createdAt: '5 часов назад' },
+    { id: '3', title: 'Ocean Waves', genre: 'Ambient', duration: '5:30', coverEmoji: '🌊', createdAt: 'Вчера' },
+    { id: '4', title: 'Electric Soul', genre: 'Pop', duration: '3:20', coverEmoji: '⚡', createdAt: '2 дня назад' },
+  ]);
+
+  const [trackTitle, setTrackTitle] = useState('');
+  const [trackDescription, setTrackDescription] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState('');
+  const [uploadedVoice, setUploadedVoice] = useState<string | null>(null);
+  const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
+
+  const genres = [
+    { name: 'Hip-Hop', emoji: '🎤', color: 'from-purple-500 to-pink-500' },
+    { name: 'Pop', emoji: '🎵', color: 'from-pink-500 to-rose-500' },
+    { name: 'Rock', emoji: '🎸', color: 'from-red-500 to-orange-500' },
+    { name: 'Electronic', emoji: '🎧', color: 'from-blue-500 to-cyan-500' },
+    { name: 'Jazz', emoji: '🎺', color: 'from-yellow-500 to-amber-500' },
+    { name: 'Ambient', emoji: '🌌', color: 'from-indigo-500 to-purple-500' },
+  ];
+
+  const popularArtists: Artist[] = [
+    { name: 'Drake', emoji: '🦉' },
+    { name: 'Taylor Swift', emoji: '✨' },
+    { name: 'The Weeknd', emoji: '🌃' },
+    { name: 'Billie Eilish', emoji: '👁️' },
+    { name: 'Ed Sheeran', emoji: '🎸' },
+    { name: 'Ariana Grande', emoji: '🎀' },
+  ];
+
+  const handleCreateTrack = () => {
+    if (!trackTitle || !selectedGenre) return;
+
+    const newTrack: Track = {
+      id: Date.now().toString(),
+      title: trackTitle,
+      genre: selectedGenre,
+      duration: '0:00',
+      coverEmoji: genres.find(g => g.name === selectedGenre)?.emoji || '🎵',
+      createdAt: 'Только что',
+    };
+
+    setTracks([newTrack, ...tracks]);
+    setIsCreateOpen(false);
+    setTrackTitle('');
+    setTrackDescription('');
+    setSelectedGenre('');
+    setUploadedVoice(null);
+    setSelectedArtist(null);
   };
 
-  const albums = [
-    { title: "Digital Dreams", year: "2024", cover: "🎵", tracks: 12, type: "Альбом" },
-    { title: "Street Poetry", year: "2025", cover: "🔥", tracks: 15, type: "Альбом" },
-    { title: "Late Night Vibes", year: "2025", cover: "🌙", tracks: 8, type: "EP" },
-    { title: "Summer Hits", year: "2026", cover: "☀️", tracks: 10, type: "Альбом" },
-  ];
-
-  const releases = [
-    { date: "2026-01-15", title: "New Single: Космос", type: "Сингл", status: "Анонс" },
-    { date: "2026-02-20", title: "Альбом: Звёздная пыль", type: "Альбом", status: "В работе" },
-    { date: "2026-03-10", title: "Коллаб с DJ Pulse", type: "Сингл", status: "Запись" },
-    { date: "2026-04-05", title: "EP: Ночной город", type: "EP", status: "Анонс" },
-  ];
-
-  const articles = [
-    { title: "Интервью для Rolling Stone Russia", date: "10 дек 2025", category: "Интервью" },
-    { title: "Как мы создавали альбом Street Poetry", date: "25 ноя 2025", category: "За кулисами" },
-    { title: "10 причин, почему рэп меняет Россию", date: "15 ноя 2025", category: "Мнение" },
-    { title: "Выступление на премии МУЗ-ТВ", date: "05 ноя 2025", category: "Новости" },
-  ];
-
-  const videos = [
-    { title: "Digital Dreams - Official Video", views: "2.5M", duration: "3:45" },
-    { title: "Behind The Scenes: Street Poetry", views: "850K", duration: "15:20" },
-    { title: "Live at Moscow Arena 2025", views: "1.2M", duration: "45:30" },
-    { title: "Freestyle Session #5", views: "650K", duration: "8:15" },
-  ];
-
-  const gallery = [
-    { id: 1, image: 'https://cdn.poehali.dev/projects/e3eca07f-b4d1-491a-a325-30b6c7379be5/files/7ea67445-ba51-46eb-85c8-adb7ad2b2246.jpg' },
-    { id: 2, image: 'https://cdn.poehali.dev/projects/e3eca07f-b4d1-491a-a325-30b6c7379be5/files/4a5fca63-d0ce-47c6-a674-3753c08e2d8e.jpg' },
-    { id: 3, image: 'https://cdn.poehali.dev/projects/e3eca07f-b4d1-491a-a325-30b6c7379be5/files/f5642d38-a242-4e69-92e6-45fbcdd55e6c.jpg' },
-    { id: 4, emoji: '🎤' },
-    { id: 5, emoji: '🎧' },
-    { id: 6, emoji: '🎸' },
-    { id: 7, emoji: '🎬' },
-    { id: 8, emoji: '🎪' },
-  ];
+  const handleVoiceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploadedVoice(file.name);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-        <div className="container mx-auto px-4 py-4">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-black text-gradient">ДВОЙНОЙ УДАР</h1>
-            <div className="hidden md:flex gap-6">
-              {['hero', 'bio', 'discography', 'releases', 'gallery', 'videos', 'articles', 'contacts'].map((section) => (
-                <button
-                  key={section}
-                  onClick={() => scrollToSection(section)}
-                  className="text-sm font-medium hover:text-primary transition-colors capitalize"
-                >
-                  {section === 'hero' ? 'Главная' : 
-                   section === 'bio' ? 'Биография' :
-                   section === 'discography' ? 'Дискография' :
-                   section === 'releases' ? 'Релизы' :
-                   section === 'gallery' ? 'Галерея' :
-                   section === 'videos' ? 'Видео' :
-                   section === 'articles' ? 'Статьи' :
-                   'Контакты'}
-                </button>
-              ))}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
+                <Icon name="Music" size={24} className="text-white" />
+              </div>
+              <h1 className="text-2xl font-black text-gradient">VoiceAI Studio</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" className="gap-2">
+                <Icon name="Library" size={20} />
+                <span className="hidden md:inline">Библиотека</span>
+              </Button>
+              <Button variant="ghost" className="gap-2">
+                <Icon name="User" size={20} />
+                <span className="hidden md:inline">Профиль</span>
+              </Button>
             </div>
           </div>
         </div>
       </nav>
 
-      <section id="hero" className="pt-32 pb-20 px-4 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <img 
-            src="https://cdn.poehali.dev/projects/e3eca07f-b4d1-491a-a325-30b6c7379be5/files/7ea67445-ba51-46eb-85c8-adb7ad2b2246.jpg"
-            alt="Двойной удар выступление"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="container mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-6 py-2 mb-8 backdrop-blur">
-            <Icon name="Music" size={20} className="text-primary" />
-            <span className="text-sm font-semibold text-primary">Лучший рэп-дуэт 2026</span>
-          </div>
-          <h1 className="text-6xl md:text-8xl font-black mb-6 text-gradient leading-tight">
-            ДВОЙНОЙ<br />УДАР
-          </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-12">
-            Алекс Пламя и Макс Скорость — два голоса, одна энергия. 
-            Разрушаем стереотипы русского рэпа с 2023 года.
-          </p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Button size="lg" className="gradient-primary text-white font-bold px-8 hover-scale">
-              <Icon name="Play" size={20} className="mr-2" />
-              Слушать треки
-            </Button>
-            <Button size="lg" variant="outline" className="font-bold px-8 hover-scale backdrop-blur">
-              <Icon name="Calendar" size={20} className="mr-2" />
-              Купить билеты
-            </Button>
-          </div>
-        </div>
-      </section>
+      <main className="pt-24 pb-12 px-6">
+        <div className="container mx-auto max-w-7xl">
+          <div className="mb-12 text-center">
+            <h2 className="text-5xl md:text-6xl font-black mb-4 text-gradient animate-fade-in">
+              Создавай музыку<br />со своим голосом
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8 animate-fade-in">
+              Загружай свой голос, выбирай стиль и делай фиты с популярными артистами. 
+              AI создаст уникальный трек за минуты.
+            </p>
 
-      <section id="bio" className="py-20 px-4 bg-muted/30">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4">Биография</h2>
-            <p className="text-xl text-muted-foreground">История команды</p>
-          </div>
-          
-          <div className="max-w-4xl mx-auto space-y-12">
-            <div className="flex gap-8 items-start">
-              <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center text-4xl flex-shrink-0">
-                2023
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">Начало пути</h3>
-                <p className="text-muted-foreground">
-                  Алекс и Макс встретились на андеграундной рэп-баттле в Москве. 
-                  Их первый трек "Двойная сила" собрал 500K прослушиваний за неделю 
-                  и привлёк внимание крупных лейблов.
-                </p>
-              </div>
-            </div>
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+              <DialogTrigger asChild>
+                <Button size="lg" className="gradient-primary text-white font-bold px-8 gap-3 hover-scale animate-pulse-slow">
+                  <Icon name="Plus" size={24} />
+                  Создать трек
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black">Создание трека</DialogTitle>
+                </DialogHeader>
 
-            <div className="flex gap-8 items-start">
-              <div className="w-20 h-20 rounded-full gradient-accent flex items-center justify-center text-4xl flex-shrink-0">
-                2024
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">Прорыв</h3>
-                <p className="text-muted-foreground">
-                  Релиз дебютного альбома "Digital Dreams" и тур по 30 городам России. 
-                  Номинация на премию МУЗ-ТВ в категории "Прорыв года". 
-                  Коллаборация с Oxxxymiron на треке "Новая волна".
-                </p>
-              </div>
-            </div>
+                <div className="space-y-6 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Название трека</Label>
+                    <Input
+                      id="title"
+                      placeholder="Введите название..."
+                      value={trackTitle}
+                      onChange={(e) => setTrackTitle(e.target.value)}
+                    />
+                  </div>
 
-            <div className="flex gap-8 items-start">
-              <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center text-4xl flex-shrink-0">
-                2025
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">Покорение вершин</h3>
-                <p className="text-muted-foreground">
-                  Альбом "Street Poetry" занял 1 место в чартах Apple Music. 
-                  Выступления на фестивалях Rap Fest и Kubana. 
-                  Более 50 миллионов стримов на всех платформах.
-                </p>
-              </div>
-            </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Описание (опционально)</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="О чём трек?..."
+                      value={trackDescription}
+                      onChange={(e) => setTrackDescription(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
 
-            <div className="flex gap-8 items-start">
-              <div className="w-20 h-20 rounded-full gradient-accent flex items-center justify-center text-4xl flex-shrink-0">
-                2026
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">Настоящее</h3>
-                <p className="text-muted-foreground">
-                  Работа над новым альбомом "Звёздная пыль". 
-                  Международный тур по Европе и СНГ. 
-                  Запуск собственного музыкального лейбла "Double Hit Records".
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="discography" className="py-20 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4">Дискография</h2>
-            <p className="text-xl text-muted-foreground">Наши релизы</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-            {albums.map((album, index) => (
-              <Card key={index} className="hover-scale overflow-hidden border-2 border-primary/20 bg-card/50 backdrop-blur">
-                <CardContent className="p-6">
-                  <div className="text-8xl text-center mb-4">{album.cover}</div>
-                  <Badge className="mb-3">{album.type}</Badge>
-                  <h3 className="text-xl font-bold mb-2">{album.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-4">{album.year} • {album.tracks} треков</p>
-                  <Button className="w-full gradient-primary text-white font-semibold">
-                    <Icon name="Play" size={16} className="mr-2" />
-                    Слушать
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="releases" className="py-20 px-4 bg-muted/30">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4">График релизов</h2>
-            <p className="text-xl text-muted-foreground">Анонсы будущих проектов</p>
-          </div>
-
-          <div className="max-w-4xl mx-auto space-y-6">
-            {releases.map((release, index) => (
-              <Card key={index} className="overflow-hidden border-l-4 border-l-primary hover-scale">
-                <CardContent className="p-6 flex items-start gap-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-16 h-16 rounded-lg gradient-primary flex items-center justify-center">
-                      <Icon name="Calendar" size={28} className="text-white" />
+                  <div className="space-y-3">
+                    <Label>Выберите стиль</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {genres.map((genre) => (
+                        <button
+                          key={genre.name}
+                          onClick={() => setSelectedGenre(genre.name)}
+                          className={`p-4 rounded-lg border-2 transition-all hover-scale ${
+                            selectedGenre === genre.name
+                              ? 'border-primary bg-primary/10'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <div className="text-4xl mb-2">{genre.emoji}</div>
+                          <div className="font-semibold">{genre.name}</div>
+                        </button>
+                      ))}
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Badge variant="secondary">{release.status}</Badge>
-                      <Badge variant="outline">{release.type}</Badge>
+
+                  <div className="space-y-3">
+                    <Label>Добавить аудио (ваш голос)</Label>
+                    <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+                      <input
+                        type="file"
+                        accept="audio/*"
+                        onChange={handleVoiceUpload}
+                        className="hidden"
+                        id="voice-upload"
+                      />
+                      <label htmlFor="voice-upload" className="cursor-pointer">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Icon name="Mic" size={32} className="text-primary" />
+                          </div>
+                          {uploadedVoice ? (
+                            <div className="space-y-1">
+                              <p className="font-semibold text-primary">{uploadedVoice}</p>
+                              <p className="text-sm text-muted-foreground">Нажмите, чтобы изменить</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-1">
+                              <p className="font-semibold">Загрузите аудиофайл</p>
+                              <p className="text-sm text-muted-foreground">MP3, WAV до 10 МБ</p>
+                            </div>
+                          )}
+                        </div>
+                      </label>
                     </div>
-                    <h3 className="text-2xl font-bold mb-2">{release.title}</h3>
-                    <p className="text-muted-foreground flex items-center gap-2">
-                      <Icon name="Clock" size={16} />
-                      Дата выхода: {new Date(release.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
-                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <section id="gallery" className="py-20 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4">Галерея</h2>
-            <p className="text-xl text-muted-foreground">Моменты из жизни</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
-            {gallery.map((item) => (
-              <Card key={item.id} className="aspect-square hover-scale overflow-hidden border-2 border-primary/20">
-                <CardContent className="p-0 h-full flex items-center justify-center text-8xl bg-gradient-to-br from-primary/20 to-secondary/20">
-                  {item.image ? (
-                    <img src={item.image} alt={`Gallery ${item.id}`} className="w-full h-full object-cover" />
-                  ) : (
-                    item.emoji
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="videos" className="py-20 px-4 bg-muted/30">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4">Видео</h2>
-            <p className="text-xl text-muted-foreground">Клипы и записи</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-            {videos.map((video, index) => (
-              <Card key={index} className="hover-scale overflow-hidden border-2 border-primary/20">
-                <CardContent className="p-0">
-                  <div className="aspect-video bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center relative">
-                    <Icon name="Play" size={64} className="text-white opacity-80" />
-                    <Badge className="absolute top-4 right-4">{video.duration}</Badge>
+                  <div className="space-y-3">
+                    <Label>Выберите артиста для фита (опционально)</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {popularArtists.map((artist) => (
+                        <button
+                          key={artist.name}
+                          onClick={() => setSelectedArtist(artist.name)}
+                          className={`p-3 rounded-lg border-2 transition-all hover-scale ${
+                            selectedArtist === artist.name
+                              ? 'border-primary bg-primary/10'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <div className="text-3xl mb-1">{artist.emoji}</div>
+                          <div className="text-sm font-medium">{artist.name}</div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold mb-2">{video.title}</h3>
-                    <p className="text-muted-foreground flex items-center gap-2">
-                      <Icon name="Eye" size={16} />
-                      {video.views} просмотров
-                    </p>
+
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      onClick={handleCreateTrack}
+                      disabled={!trackTitle || !selectedGenre}
+                      className="flex-1 gradient-primary text-white font-bold"
+                      size="lg"
+                    >
+                      <Icon name="Sparkles" size={20} className="mr-2" />
+                      Создать трек
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsCreateOpen(false)}
+                      size="lg"
+                    >
+                      Отмена
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="articles" className="py-20 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4">Статьи</h2>
-            <p className="text-xl text-muted-foreground">Пресса и новости</p>
-          </div>
-
-          <div className="max-w-4xl mx-auto space-y-4">
-            {articles.map((article, index) => (
-              <Card key={index} className="hover-scale overflow-hidden border-l-4 border-l-accent cursor-pointer">
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div className="flex-1">
-                    <Badge className="mb-2">{article.category}</Badge>
-                    <h3 className="text-xl font-bold mb-1">{article.title}</h3>
-                    <p className="text-muted-foreground text-sm">{article.date}</p>
-                  </div>
-                  <Icon name="ArrowRight" size={24} className="text-muted-foreground" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="contacts" className="py-20 px-4 bg-muted/30">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4">Контакты</h2>
-            <p className="text-xl text-muted-foreground">Связь с нами</p>
-          </div>
-
-          <div className="max-w-2xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              <Card className="hover-scale text-center cursor-pointer">
-                <CardContent className="p-8">
-                  <Icon name="Instagram" size={48} className="mx-auto mb-4 text-secondary" />
-                  <h3 className="font-bold text-lg mb-2">Instagram</h3>
-                  <p className="text-muted-foreground">@doublehit_official</p>
-                </CardContent>
-              </Card>
-
-              <Card className="hover-scale text-center cursor-pointer">
-                <CardContent className="p-8">
-                  <Icon name="Youtube" size={48} className="mx-auto mb-4 text-accent" />
-                  <h3 className="font-bold text-lg mb-2">YouTube</h3>
-                  <p className="text-muted-foreground">DoubleHitOfficial</p>
-                </CardContent>
-              </Card>
-
-              <Card className="hover-scale text-center cursor-pointer">
-                <CardContent className="p-8">
-                  <Icon name="Mail" size={48} className="mx-auto mb-4 text-primary" />
-                  <h3 className="font-bold text-lg mb-2">Email</h3>
-                  <p className="text-muted-foreground">info@doublehit.ru</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="gradient-primary text-white">
-              <CardContent className="p-12 text-center">
-                <h3 className="text-3xl font-black mb-4">Подпишись на рассылку</h3>
-                <p className="mb-6 opacity-90">Получай новости о релизах и концертах первым</p>
-                <div className="flex gap-3 max-w-md mx-auto">
-                  <input 
-                    type="email" 
-                    placeholder="твой@email.ru" 
-                    className="flex-1 px-4 py-3 rounded-lg text-foreground bg-white/90 focus:outline-none focus:ring-2 focus:ring-white"
-                  />
-                  <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold px-8">
-                    Отправить
-                  </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-3xl font-bold">Моя библиотека</h3>
+              <Badge variant="secondary" className="text-sm">
+                {tracks.length} {tracks.length === 1 ? 'трек' : 'треков'}
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {tracks.map((track, index) => (
+                <Card
+                  key={track.id}
+                  className="hover-scale overflow-hidden border-2 border-primary/20 group cursor-pointer animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <CardContent className="p-0">
+                    <div className="aspect-square bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center relative">
+                      <div className="text-8xl">{track.coverEmoji}</div>
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button size="lg" className="rounded-full w-16 h-16 gradient-primary">
+                          <Icon name="Play" size={24} className="text-white" />
+                        </Button>
+                      </div>
+                      <Badge className="absolute top-3 right-3">{track.duration}</Badge>
+                    </div>
+                    <div className="p-4 space-y-2">
+                      <h4 className="font-bold text-lg truncate">{track.title}</h4>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>{track.genre}</span>
+                        <span>{track.createdAt}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              <Card className="hover-scale overflow-hidden border-2 border-dashed border-primary/40 cursor-pointer">
+                <CardContent className="p-0 h-full">
+                  <div
+                    className="aspect-square flex flex-col items-center justify-center gap-4 text-muted-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsCreateOpen(true)}
+                  >
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Icon name="Plus" size={32} className="text-primary" />
+                    </div>
+                    <p className="font-semibold">Создать новый трек</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <div className="mt-16">
+            <h3 className="text-3xl font-bold mb-6">Популярные жанры</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {genres.map((genre) => (
+                <Card
+                  key={genre.name}
+                  className="hover-scale cursor-pointer border-2 border-primary/20 overflow-hidden group"
+                >
+                  <CardContent className="p-6">
+                    <div className={`bg-gradient-to-br ${genre.color} rounded-lg p-8 mb-3 group-hover:scale-110 transition-transform`}>
+                      <div className="text-5xl text-center">{genre.emoji}</div>
+                    </div>
+                    <p className="font-bold text-center">{genre.name}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
-      </section>
+      </main>
 
-      <footer className="py-12 px-4 border-t border-border">
-        <div className="container mx-auto text-center">
-          <h2 className="text-2xl font-black text-gradient mb-4">ДВОЙНОЙ УДАР</h2>
-          <p className="text-muted-foreground mb-6">© 2026 Double Hit Records. Все права защищены.</p>
-          <div className="flex justify-center gap-6">
-            <Button variant="ghost" size="sm">Политика конфиденциальности</Button>
-            <Button variant="ghost" size="sm">Условия использования</Button>
-            <Button variant="ghost" size="sm">Пресс-центр</Button>
-          </div>
+      <footer className="border-t border-border py-8 px-6 mt-12">
+        <div className="container mx-auto text-center text-muted-foreground">
+          <p className="text-sm">
+            © 2026 VoiceAI Studio. Создавай музыку с помощью AI. 🎵
+          </p>
         </div>
       </footer>
     </div>
